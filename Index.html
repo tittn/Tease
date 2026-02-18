@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stronghold — Proof of HODL</title>
+  <meta name="description" content="Stronghold. Proof of HODL. Built on Hedera. Coming soon." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,400&family=Syne:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --deep:  #04080f;
+      --navy:  #0a1428;
+      --blue:  #0f2147;
+      --blue2: #1a3a6e;
+      --azure: #2a5ba8;
+      --sky:   #4d8fd4;
+      --sky-lt:#8bbce8;
+      --gold:  #c9a84c;
+      --gold2: #e8cc78;
+      --gold3: #7a6028;
+      --stone: #5a6a96;
+      --fog:   #8898c0;
+      --white: #e8edf8;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--deep);
+      color: var(--white);
+      font-family: 'Syne', sans-serif;
+      cursor: none;
+    }
+
+    /* ── CURSOR ── */
+    #cur {
+      position: fixed; width: 7px; height: 7px;
+      background: var(--gold); border-radius: 50%;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+    }
+    #curR {
+      position: fixed; width: 30px; height: 30px;
+      border: 1px solid rgba(201,168,76,.35); border-radius: 50%;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+      transition: left .1s ease, top .1s ease;
+    }
+
+    /* ── BACKGROUND CANVAS ── */
+    #spiral {
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── ATMOSPHERE ── */
+    .atmos {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none;
+      background:
+        radial-gradient(ellipse 90% 70% at 50% 50%, rgba(15,33,71,.5) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 60% at 15% 40%, rgba(26,58,110,.25) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 60% at 85% 60%, rgba(26,58,110,.2) 0%, transparent 60%),
+        radial-gradient(ellipse 100% 100% at 50% 50%, transparent 45%, rgba(4,8,15,.95) 100%);
+    }
+
+    /* ── GRAIN ── */
+    .grain {
+      position: fixed; inset: 0; z-index: 2; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: .03;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.4rem 4vw;
+      opacity: 0; animation: rise .7s .1s forwards;
+    }
+    .logo-lockup {
+      display: flex; align-items: center; gap: .75rem;
+    }
+    .logo-img {
+      width: 40px; height: 40px; object-fit: contain;
+      mix-blend-mode: screen; filter: brightness(1.1);
+    }
+    .logo-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase; line-height: 1;
+    }
+    .logo-strong { color: var(--sky-lt); }
+    .logo-hold   { color: var(--gold2); }
+    .logo-tagline {
+      font-size: .45rem; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--stone); margin-top: .2rem;
+    }
+    .hedera-tag {
+      font-size: .5rem; letter-spacing: .25em; text-transform: uppercase;
+      color: var(--stone); display: flex; align-items: center; gap: .5rem;
+    }
+    .hedera-tag::before {
+      content: ''; display: inline-block; width: 5px; height: 5px;
+      border-radius: 50%; background: var(--azure);
+      box-shadow: 0 0 6px var(--azure);
+      animation: breathe 3s ease-in-out infinite;
+    }
+    @keyframes breathe { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+    /* ── CENTERED STAGE ── */
+    .stage {
+      position: fixed; inset: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: center;
+      padding: 5rem 2rem 2rem;
+    }
+
+    .center {
+      width: 100%; max-width: 720px;
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center;
+      gap: 0;
+    }
+
+    /* Coming soon pill */
+    .cs-badge {
+      display: inline-flex; align-items: center; gap: .6rem;
+      padding: .45rem 1.1rem;
+      border: 1px solid rgba(42,91,168,.35);
+      background: rgba(15,33,71,.4);
+      margin-bottom: 2rem;
+      opacity: 0; animation: rise .7s .25s forwards;
+    }
+    .cs-pulse {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--azure); box-shadow: 0 0 7px var(--azure);
+      animation: breathe 2s ease-in-out infinite;
+    }
+    .cs-text {
+      font-size: .5rem; letter-spacing: .24em; text-transform: uppercase;
+      color: var(--fog);
+    }
+
+    /* Main headline */
+    .main-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 5.5rem);
+      font-weight: 300; letter-spacing: -.02em;
+      /* Fixed height prevents layout shift — generous padding prevents clipping */
+      height: 2.8em;
+      line-height: 1.25;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: .2em 0 .3em;
+      overflow: visible;
+      opacity: 0; animation: rise 1s .4s forwards;
+      transition: opacity .5s ease, transform .5s ease;
+      width: 100%;
+    }
+    #phrase-line1 {
+      display: block; white-space: nowrap;
+      color: var(--white); font-weight: 300;
+      padding-bottom: .05em;
+    }
+    #phrase-line2 {
+      display: block; white-space: nowrap;
+      font-style: italic; color: var(--gold2); font-weight: 300;
+      padding-bottom: .1em;
+    }
+
+    /* Sub */
+    .sub {
+      margin-top: 1.618rem;
+      font-size: clamp(.78rem, 1.1vw, .92rem);
+      color: var(--fog); line-height: 1.8; max-width: 54ch;
+      opacity: 0; animation: rise .9s .58s forwards;
+    }
+    .sub strong { color: var(--sky-lt); font-weight: 500; }
+
+    /* Fibonacci strip */
+    .fib-strip {
+      margin-top: 1.4rem;
+      display: flex; align-items: center; justify-content: center;
+      gap: .5rem;
+      opacity: 0; animation: rise .8s .72s forwards;
+    }
+    .fib-n {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(.85rem, 1.2vw, 1.05rem);
+      color: rgba(77,143,212,.25); font-weight: 300;
+      transition: color .5s, text-shadow .5s;
+    }
+    .fib-n.lit {
+      color: var(--gold2);
+      text-shadow: 0 0 14px rgba(232,204,120,.5);
+    }
+    .fib-dot { color: rgba(42,91,168,.2); font-size: .58rem; }
+
+    /* Divider */
+    .divider {
+      width: 1px; height: 36px; margin: 1.8rem auto;
+      background: linear-gradient(to bottom, rgba(42,91,168,.5), rgba(201,168,76,.3), transparent);
+      opacity: 0; animation: rise .7s .82s forwards;
+    }
+
+    /* Three pillars — horizontal on desktop */
+    .pillars {
+      width: 100%;
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+      opacity: 0; animation: rise .9s .9s forwards;
+    }
+    .pillar {
+      padding: 1.2rem 1.8rem;
+      border-right: 1px solid rgba(42,91,168,.12);
+      text-align: center;
+    }
+    .pillar:last-child { border-right: none; }
+    .pillar-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem; font-weight: 300;
+      color: var(--azure); line-height: 1;
+      margin-bottom: .5rem;
+    }
+    .pillar-title {
+      font-size: .58rem; font-weight: 700; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--sky-lt);
+      margin-bottom: .4rem;
+    }
+    .pillar-desc {
+      font-size: .68rem; color: var(--fog); line-height: 1.6;
+    }
+    .pillar-desc em { color: var(--gold); font-style: normal; }
+
+    /* NFT kickstart section */
+    .nft-section {
+      width: 100%; margin-top: 1.6rem;
+      padding: 1.2rem 2rem;
+      border: 1px solid rgba(42,91,168,.18);
+      background: rgba(15,33,71,.25);
+      position: relative; overflow: hidden;
+      opacity: 0; animation: rise .9s 1.05s forwards;
+    }
+    /* subtle gold top-border accent */
+    .nft-section::before {
+      content: '';
+      position: absolute; top: 0; left: 15%; right: 15%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(201,168,76,.4), transparent);
+    }
+    .nft-inner {
+      display: flex; align-items: center; justify-content: center;
+      gap: 2.5rem; flex-wrap: wrap;
+    }
+    .nft-eyebrow {
+      font-size: .5rem; letter-spacing: .28em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: .35rem;
+    }
+    .nft-headline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; font-weight: 300; color: var(--white);
+      line-height: 1.2;
+    }
+    .nft-headline em { color: var(--gold2); font-style: italic; }
+    .nft-desc {
+      font-size: .62rem; color: var(--fog); line-height: 1.6;
+      max-width: 34ch; margin-top: .3rem;
+    }
+
+    .nft-releases {
+      display: flex; gap: 1rem;
+    }
+    .nft-rel {
+      text-align: center; padding: .6rem 1rem;
+      border: 1px solid rgba(42,91,168,.2);
+      background: rgba(10,20,40,.4);
+      min-width: 88px;
+      transition: border-color .3s;
+    }
+    .nft-rel:hover { border-color: rgba(201,168,76,.3); }
+    .nft-rel-name {
+      font-size: .5rem; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--stone); margin-bottom: .3rem;
+    }
+    .nft-rel.genesis .nft-rel-name { color: var(--gold2); }
+    .nft-rel-supply {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; font-weight: 300; color: var(--white);
+      line-height: 1;
+    }
+    .nft-rel-sub {
+      font-size: .46rem; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--stone); margin-top: .18rem;
+    }
+    .nft-rel.genesis .nft-rel-supply { color: var(--gold2); }
+
+    /* Footer line */
+    .footer-line {
+      margin-top: 1.5rem;
+      font-size: .48rem; letter-spacing: .18em; text-transform: uppercase;
+      color: rgba(90,106,150,.5);
+      opacity: 0; animation: rise .6s 1.2s forwards;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes rise {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes phraseFadeIn {
+      from { opacity:0; transform:translateY(10px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes phraseFadeOut {
+      from { opacity:1; transform:translateY(0); }
+      to   { opacity:0; transform:translateY(-10px); }
+    }
+    .main-title.fading-out { animation: phraseFadeOut .6s ease forwards; }
+    .main-title.fading-in  { animation: phraseFadeIn  .6s ease forwards; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 640px) {
+      html, body {
+        overflow-x: hidden;
+        overflow-y: auto;
+        height: auto;
+      }
+
+      /* Keep decorative layers fixed behind scrolling content */
+      #spiral, .atmos, .grain { position: fixed; }
+
+      /* Topbar: shrink and hide hedera tag to save space */
+      .topbar {
+        position: fixed;
+        padding: .9rem 1.2rem;
+        background: rgba(4,8,15,.85);
+        backdrop-filter: blur(8px);
+        z-index: 30;
+      }
+      .hedera-tag { display: none; }
+      .logo-img   { width: 32px; height: 32px; }
+      .logo-text  { font-size: .95rem; }
+
+      /* Stage scrolls as a normal block */
+      .stage {
+        position: relative;
+        padding: 5.5rem 1.2rem 3rem;
+        align-items: flex-start;
+        justify-content: flex-start;
+        min-height: unset;
+        height: auto;
+      }
+
+      .center {
+        max-width: 100%;
+        padding-bottom: 2rem;
+        gap: 0;
+      }
+
+      /* Coming soon badge */
+      .cs-badge { margin-bottom: 1.2rem; }
+
+      /* Headline */
+      .main-title {
+        font-size: clamp(1.7rem, 7.5vw, 2.6rem);
+        height: auto;
+        min-height: 2.6em;
+      }
+      #phrase-line1, #phrase-line2 { white-space: normal; }
+
+      /* Sub text */
+      .sub { font-size: .82rem; margin-top: 1rem; }
+
+      /* Fibonacci strip */
+      .fib-strip { margin-top: 1rem; flex-wrap: wrap; justify-content: center; }
+
+      /* Divider */
+      .divider { margin: 1.2rem auto; }
+
+      /* Pillars — stack vertically */
+      .pillars {
+        grid-template-columns: 1fr;
+        width: 100%;
+      }
+      .pillar {
+        border-right: none;
+        border-bottom: 1px solid rgba(42,91,168,.12);
+        padding: .9rem 0;
+        text-align: left;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      .pillar:last-child { border-bottom: none; }
+      .pillar-num { min-width: 2rem; text-align: center; }
+
+      /* NFT section — fully fluid */
+      .nft-section {
+        padding: 1rem;
+        margin-top: 1.2rem;
+      }
+      .nft-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      .nft-releases {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: .5rem;
+      }
+      .nft-rel {
+        min-width: unset;
+        width: 100%;
+        padding: .6rem .4rem;
+      }
+      .nft-rel-supply { font-size: 1rem; }
+      .nft-desc { max-width: 100%; }
+
+      /* Footer */
+      .footer-line {
+        font-size: .42rem;
+        margin-top: 1.5rem;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="cur"></div>
+  <div id="curR"></div>
+  <canvas id="spiral"></canvas>
+  <div class="atmos"></div>
+  <div class="grain"></div>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="logo-lockup">
+      <img class="logo-img" src="/mnt/user-data/uploads/logo_png_file_3.png" alt="Stronghold" />
+      <div>
+        <div class="logo-text">
+          <span class="logo-strong">Strong</span><span class="logo-hold">hold</span>
+        </div>
+        <div class="logo-tagline">Proof of HODL</div>
+      </div>
+    </div>
+    <div class="hedera-tag">Built on Hedera Hashgraph</div>
+  </div>
+
+  <!-- Centered content -->
+  <div class="stage">
+    <div class="center">
+
+      <!-- Status pill -->
+      <div class="cs-badge">
+        <div class="cs-pulse"></div>
+        <div class="cs-text">Genesis Launch Coming Soon</div>
+      </div>
+
+      <!-- Headline — cycles through catchphrases -->
+      <h1 class="main-title" id="main-title">
+        <span id="phrase-line1">Stronghold.</span>
+        <em id="phrase-line2">Built to be held.</em>
+      </h1>
+
+      <!-- Sub -->
+      <p class="sub">
+        Stronghold is a proof of hold coin on the Hedera blockchain. The longer you vest <strong>SHC</strong>, the greater your weight — and the greater your weight, the higher your chance of being selected in every token distribution across 21 sequences.
+      </p>
+
+      <!-- Fibonacci strip -->
+      <div class="fib-strip">
+        <span class="fib-n">1</span><span class="fib-dot">·</span>
+        <span class="fib-n">1</span><span class="fib-dot">·</span>
+        <span class="fib-n">2</span><span class="fib-dot">·</span>
+        <span class="fib-n">3</span><span class="fib-dot">·</span>
+        <span class="fib-n">5</span><span class="fib-dot">·</span>
+        <span class="fib-n">8</span><span class="fib-dot">·</span>
+        <span class="fib-n">13</span><span class="fib-dot">·</span>
+        <span class="fib-n">21</span><span class="fib-dot">·</span>
+        <span class="fib-n lit">∞</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Three pillars -->
+      <div class="pillars">
+        <div class="pillar">
+          <div class="pillar-num">φ</div>
+          <div class="pillar-title">Weight-Based Rewards</div>
+          <div class="pillar-desc">Every distribution selects winners by <em>weighted draw</em>. Time in The Vault builds your weight — increasing your chance of being selected, not the size of your payout.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-num">21</div>
+          <div class="pillar-title">A Structured Journey</div>
+          <div class="pillar-desc">21 Fibonacci-sequenced epochs. Each completed without withdrawal builds your <em>weight</em> — compounding conviction over time.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-num">∞</div>
+          <div class="pillar-title">Fully Autonomous</div>
+          <div class="pillar-desc">All treasury releases and reflections run on <em>Hedera Scheduled Transactions</em>. No keepers, no bots — the chain executes itself.</div>
+        </div>
+      </div>
+
+      <!-- NFT Kickstart -->
+      <div class="nft-section">
+        <div class="nft-inner">
+          <div>
+            <div class="nft-eyebrow">Initial Token Distribution</div>
+            <div class="nft-headline">Genesis NFT — <em>kickstarting the ecosystem</em></div>
+            <div class="nft-desc">
+              The Genesis NFT sale funds the on-chain infrastructure and puts SHC tokens directly into the hands of the first holders — seeding the ecosystem before The Vault opens.
+            </div>
+          </div>
+          <div class="nft-releases">
+            <div class="nft-rel genesis">
+              <div class="nft-rel-name">Genesis</div>
+              <div class="nft-rel-supply">6,765</div>
+              <div class="nft-rel-sub">NFTs · φ⁸</div>
+            </div>
+            <div class="nft-rel">
+              <div class="nft-rel-name">Momentum</div>
+              <div class="nft-rel-supply">10,964</div>
+              <div class="nft-rel-sub">NFTs · φ⁹</div>
+            </div>
+            <div class="nft-rel">
+              <div class="nft-rel-name">Totality</div>
+              <div class="nft-rel-supply">17,711</div>
+              <div class="nft-rel-sub">NFTs · φ¹⁰</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-line">© Stronghold · Hedera Hashgraph · Sutiibun Gajo, Visionary · All rights reserved</div>
+
+    </div>
+  </div>
+
+  <script>
+    /* ── Cursor ── */
+    const cur  = document.getElementById('cur');
+    const curR = document.getElementById('curR');
+    document.addEventListener('mousemove', e => {
+      cur.style.left  = e.clientX + 'px';
+      cur.style.top   = e.clientY + 'px';
+      setTimeout(() => { curR.style.left = e.clientX+'px'; curR.style.top = e.clientY+'px'; }, 90);
+    });
+
+    /* ── Background Fibonacci spiral ── */
+    (function () {
+      const cv = document.getElementById('spiral');
+      const cx = cv.getContext('2d');
+
+      function resize() { cv.width = window.innerWidth; cv.height = window.innerHeight; draw(); }
+
+      function draw() {
+        cx.clearRect(0, 0, cv.width, cv.height);
+        const W = cv.width, H = cv.height;
+        const sc = Math.min(W, H) * .0013;
+
+        // Grid
+        const fibs = [8,13,21,34,55,89,144,233,377,610,987];
+        cx.lineWidth = .3;
+        fibs.forEach(f => {
+          cx.strokeStyle = `rgba(42,91,168,${Math.min(.055, f/12000 + .012)})`;
+          const x = f * sc * 1.5, y = f * sc * 1.5;
+          cx.beginPath(); cx.moveTo(x,0); cx.lineTo(x,H); cx.stroke();
+          cx.beginPath(); cx.moveTo(0,y); cx.lineTo(W,y); cx.stroke();
+        });
+
+        // Spiral — centered on screen, very subtle
+        const ox = W * .5, oy = H * .5;
+        const arcs = [
+          { r:610, ax:ox,                    ay:oy,                           sa:Math.PI,    ea:Math.PI*1.5 },
+          { r:377, ax:ox,                    ay:oy-377*sc,                    sa:Math.PI*1.5,ea:Math.PI*2   },
+          { r:233, ax:ox+233*sc,             ay:oy-377*sc,                    sa:Math.PI*.5, ea:Math.PI     },
+          { r:144, ax:ox+233*sc,             ay:oy-377*sc+144*sc,             sa:0,          ea:Math.PI*.5  },
+          { r:89,  ax:ox+233*sc-89*sc,       ay:oy-377*sc+144*sc,             sa:Math.PI*1.5,ea:Math.PI*2   },
+          { r:55,  ax:ox+233*sc-89*sc,       ay:oy-377*sc+144*sc-55*sc,       sa:Math.PI,    ea:Math.PI*1.5 },
+          { r:34,  ax:ox+233*sc-89*sc+34*sc, ay:oy-377*sc+144*sc-55*sc,       sa:Math.PI*.5, ea:Math.PI     },
+          { r:21,  ax:ox+233*sc-89*sc+34*sc, ay:oy-377*sc+144*sc-55*sc+21*sc, sa:0,          ea:Math.PI*.5  },
+        ];
+        arcs.forEach((a, i) => {
+          const t  = i / (arcs.length - 1);
+          const r  = Math.round(42  + (201 - 42 ) * t);
+          const g  = Math.round(91  + (168 - 91 ) * t);
+          const b  = Math.round(168 + (76  - 168) * t);
+          const al = Math.max(.012, .08 - i * .009);
+          cx.strokeStyle = `rgba(${r},${g},${b},${al})`;
+          cx.lineWidth = 1;
+          cx.beginPath();
+          cx.arc(a.ax, a.ay, a.r * sc, a.sa, a.ea);
+          cx.stroke();
+        });
+      }
+
+      resize();
+      window.addEventListener('resize', resize);
+    })();
+
+    /* ── Catchphrase cycling ── */
+    const phrases = [
+      { l1: 'Stronghold.',             l2: 'Built to be held.'          },
+      { l1: 'Hold with conviction.',   l2: 'Earn your weight.'          },
+      { l1: 'Patience builds weight.', l2: 'Weight earns selection.'    },
+      { l1: 'The longer you hold,',    l2: 'the stronger your claim.'   },
+      { l1: 'HODL it.',               l2: 'Let weight increase over time.' },
+      { l1: 'Holding is the strategy.',l2: 'SHC finds the committed.'   },
+    ];
+    let pi = 0;
+    const line1 = document.getElementById('phrase-line1');
+    const line2 = document.getElementById('phrase-line2');
+    const titleEl = document.getElementById('main-title');
+
+    function cyclePhrase() {
+      // Fade out
+      titleEl.style.transition = 'opacity .5s ease, transform .5s ease';
+      titleEl.style.opacity    = '0';
+      titleEl.style.transform  = 'translateY(-8px)';
+      setTimeout(() => {
+        pi = (pi + 1) % phrases.length;
+        line1.textContent = phrases[pi].l1;
+        line2.textContent = phrases[pi].l2;
+        titleEl.style.transform = 'translateY(8px)';
+        // Fade in
+        requestAnimationFrame(() => {
+          titleEl.style.opacity   = '1';
+          titleEl.style.transform = 'translateY(0)';
+        });
+      }, 520);
+    }
+    setInterval(cyclePhrase, 4000);
+
+    /* ── Fibonacci number highlight cycle ── */
+    const fibEls = document.querySelectorAll('.fib-n');
+    let fi = 0;
+    setInterval(() => {
+      fibEls.forEach(n => n.classList.remove('lit'));
+      fibEls[fi % fibEls.length].classList.add('lit');
+      fi++;
+    }, 720);
+  </script>
+</body>
+</html>
